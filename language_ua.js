@@ -49,6 +49,11 @@ const keyboards = {
       text: 'Скористайтеся ботом, щоб зробити замовлення',
       url: dataBot.botUrl,
     }]] },
+    finishOrder: {
+      inline_keyboard: [
+        [{ text: 'Оформити замовлення', callback_data: '/comleate' }],
+      ]  
+    }
 
 };
 

@@ -4,6 +4,7 @@ import { dataBot, ranges } from './values.js';
 import { getLotContentByID } from './interval.js';
 import { logger } from './logger/index.js';
 import { keyboards } from './language_ua.js';
+import { findUsersByStatus } from './models/users.js';
 
 const filterKeyboard = async (chatId, filterName, range) => {
   const stateValues = await readGoogle(range);
@@ -47,6 +48,7 @@ const autoPosting = async () => {
     const lotNumber = pendingLots[index];
     try {
       const postedLot = await bot.sendMessage(dataBot.channelId, element, { reply_markup: keyboards.channelKeyboard });
+      await sendLotToRegistredCustomers(element, lotNumber);
       if (postedLot) {
         try {
           const statusChangeResult = await writeGoogle(ranges.statusCell(lotNumber), [['new']]);
@@ -78,6 +80,7 @@ const postingLots = () => {
               .replace(/^/, '\u{1F4CA} ') // add diagramm in 1 line 
               .replace(/^.*\n.*\n.*\n.*\n/, '$&\u{1F69C} '); // add tractor in 4 line
               const sentMessage = await bot.sendMessage(dataBot.channelId, message, { reply_markup: keyboards.channelKeyboard });
+              await sendLotToRegistredCustomers(message, rowNumber);
               await writeGoogle(ranges.message_idCell(rowNumber), [[sentMessage.message_id]]);
             }
           } catch (error) {
@@ -122,6 +125,16 @@ const sendFiltredToChat = async (chatId, callback_data, searchRange) => {
     const rowNumber = matchedLots[index];
     bot.sendMessage(chatId, element, { reply_markup: { inline_keyboard: [[{ text: "Купити ділянку", callback_data: `${rowNumber}` }]] } });
   });
+}
+
+const sendLotToRegistredCustomers = async (message, lotNumber) => {
+  const users = await findUsersByStatus(true);
+  const usersChatId = users.map(el => el.chat_id);
+  const reminderPromises = usersChatId.map(el => 
+    bot.sendMessage(el, message, { reply_markup: { inline_keyboard: [[{ text: "Купити ділянку", callback_data: `${lotNumber}` }]] } })
+  );
+  const remindMessages = await Promise.all(reminderPromises);
+  logger.info(`${remindMessages.length} користувачів отримали нагадування про новий лот`);
 }
 
 export { postingLots, sendAvaliableToChat, autoPosting, filterKeyboard, sendFiltredToChat }
