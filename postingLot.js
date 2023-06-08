@@ -8,15 +8,19 @@ import { findUsersByStatus } from './models/users.js';
 
 const filterKeyboard = async (chatId, filterName, range) => {
   const stateValues = await readGoogle(range);
+  const lotsStatus = await readGoogle(ranges.statusColumn);
+  const lotsStatusData = lotsStatus.slice(1)
+  console.log(lotsStatusData);
+  
   const statesList = stateValues
   .slice(1)
-  .filter((value, index, self) => value !== undefined && self.indexOf(value) === index)
+  .filter((value, index, self) => lotsStatusData[index] === 'new' && value !== undefined && self.indexOf(value) === index)
   .sort((a, b) => {
     const countA = stateValues.filter(value => value === a).length;
     const countB = stateValues.filter(value => value === b).length;
     return countB - countA;
   });
-
+  console.log(statesList)
   const result = [];
   const chunkSize = 3; 
 
@@ -29,7 +33,7 @@ const filterKeyboard = async (chatId, filterName, range) => {
     result.push(row);
   };
 
-  bot.sendMessage(chatId, `Виберіть ${filterName}`, { reply_markup: { inline_keyboard: result } });
+  bot.sendMessage(chatId, `Виберіть ${filterName}:`, { reply_markup: { inline_keyboard: result } });
 
   console.log(result);  
 }
@@ -116,8 +120,10 @@ const sendFiltredToChat = async (chatId, callback_data, searchRange) => {
   
   const searchWord = cuttingCallbackData(callback_data);
   const readedValues = await readGoogle(searchRange);
+  const lotsStatus = await readGoogle(ranges.statusColumn);
+
   const matchedLots = readedValues
-  .map((value, index) => value === searchWord ? index + 1 : null)
+  .map((value, index) => value === searchWord && lotsStatus[index] === 'new' ? index + 1 : null)
   .filter(value => value !== null);
   const contentPromises = matchedLots.map(el => getLotContentByID(el));
   const lotsContent = await Promise.all(contentPromises);

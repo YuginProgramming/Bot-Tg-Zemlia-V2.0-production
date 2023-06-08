@@ -70,10 +70,10 @@ export const anketaListiner = async() => {
           break;
         case '/autocontact':
           bot.deleteMessage(chatId, userInfo.recentMessage).catch((error) => {logger.warn(`Помилка видалення повідомлення: ${error}`);});
-          const message = await bot.sendMessage(chatId, `.` , {
-            reply_markup: { inline_keyboard: [[{ text: 'Почати спочатку', callback_data: '/start' }]] },
+          const message = await bot.sendMessage(chatId, `Для користувачів Telegram WEB` , {
+            reply_markup: { inline_keyboard: [[{ text: 'Ввести контакти', callback_data: '/manualcontact' }]] },
           });
-          bot.sendMessage(chatId, 'Ця функція не працює в WEB версії Telegram' ,{ reply_markup: { keyboard: [[{ text: 'Легко поділитися номером', request_contact: true, } ]], resize_keyboard: true, one_time_keyboard: true }});  
+          bot.sendMessage(chatId, 'Натисніть на кнопку "Легко поділитися номером" щоб ми отримали доступ до вашого номеру телефону' ,{ reply_markup: { keyboard: [[{ text: 'Легко поділитися номером', request_contact: true, } ]], resize_keyboard: true, one_time_keyboard: true }});  
           await updateRecentMessageByChatId(chatId, message.message_id);
           break;
         case  '/manualcontact':
