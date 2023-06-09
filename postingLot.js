@@ -4,7 +4,7 @@ import { dataBot, ranges } from './values.js';
 import { getLotContentByID } from './interval.js';
 import { logger } from './logger/index.js';
 import { keyboards } from './language_ua.js';
-import { findUsersByStatus } from './models/users.js';
+import { findUsersByStatus, userIsBanUpdate, findUserByChatId, deleteUserByChatId } from './models/users.js';
 
 const filterKeyboard = async (chatId, filterName, range) => {
   const stateValues = await readGoogle(range);
@@ -71,7 +71,35 @@ const autoPosting = async () => {
 };
 
 
-
+const userMenegment = () => {
+  admin.on('message', async (message) => {
+    const text = message.text;
+    const command = text.split(' ');
+    switch (command[0]) {
+      case 'update': 
+        if (command[1] === 'ban') {
+          const boolean = command[3] === '1' || command[3] === 'true' ? true : false;
+          const banUpdated = await userIsBanUpdate(command[2], boolean);
+          admin.sendMessage(message.chat.id, `User ${banUpdated} Ban status updated.`);
+        }
+        break;
+      case 'find':
+        const data = await findUserByChatId(command[1]);
+        const string = JSON.stringify(data);
+        admin.sendMessage(message.chat.id, string);
+        break;
+      case 'delete':
+        const response = await deleteUserByChatId(command[1])
+        if (response) {
+          admin.sendMessage(message.chat.id, `User ${command[1]} delated`);
+        } else {
+          admin.sendMessage(message.chat.id, `User ${command[1]} delating fail`);
+        }
+        
+        break; 
+    }
+  })
+}
 
 const postingLots = () => {
   admin.on('message', async (message) => {
@@ -143,4 +171,4 @@ const sendLotToRegistredCustomers = async (message, lotNumber) => {
   logger.info(`${remindMessages.length} користувачів отримали нагадування про новий лот`);
 }
 
-export { postingLots, sendAvaliableToChat, autoPosting, filterKeyboard, sendFiltredToChat }
+export { postingLots, sendAvaliableToChat, autoPosting, filterKeyboard, sendFiltredToChat, userMenegment }

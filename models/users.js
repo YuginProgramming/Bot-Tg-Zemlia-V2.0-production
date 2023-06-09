@@ -44,10 +44,16 @@ User.init({
         type: DataTypes.STRING,
         allowNull: true
     },
+    isBan: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
     recentMessage: {
         type: DataTypes.INTEGER,
         allowNull: true
-    }
+    },
+    
 
 }, {
     freezeTableName: false,
@@ -131,6 +137,12 @@ const userLogout = async (chat_id) => {
     return res[0] ? chat_id : undefined;
 };
 
+const userIsBanUpdate = async (chat_id, banStatus) => {
+    const res = await User.update({ isBan: banStatus }, { where: { chat_id } });
+    if (res) logger.info(`User ${chat_id} isBan updated. User data ${res[0]}`);
+    return res[0] ? chat_id : undefined;
+};
+
 
 const findUserById = async (id) => {
     const res = await User.findAll({ where: { id: id } });
@@ -150,6 +162,12 @@ const findUserByChatId = async (chat_id) => {
     return res;
 };
 
+const deleteUserByChatId = async (chat_id) => {
+    const res = await User.destroy({ where: { chat_id } });
+    if (res) logger.info(`Deleted status: ${res}. Chat id ${chat_id}`);
+    return res ? true : false;
+};
+
 export {
     User,
     createNewUser,
@@ -161,5 +179,7 @@ export {
     findUserByChatId,
     createNewUserByChatId,
     updateChatStatusByChatId,
-    updateRecentMessageByChatId
+    updateRecentMessageByChatId,
+    userIsBanUpdate,
+    deleteUserByChatId
 };   

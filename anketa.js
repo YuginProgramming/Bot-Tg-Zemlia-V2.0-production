@@ -16,7 +16,8 @@ import {
 export const anketaListiner = async() => {
     bot.setMyCommands([
       {command: '/start', description: 'Почати'},
-      {command: '/list', description: 'Показати доступні лоти'},
+      {command: '/list', description: 'Показати усі доступні лоти'},
+      {command: '/filter', description: 'Відфільтрувати лоти по областям'},
     ]);
 
     bot.on("callback_query", async (query) => {
@@ -24,12 +25,16 @@ export const anketaListiner = async() => {
       const chatId = query.message.chat.id;
       const userInfo = await findUserByChatId(chatId);
       
+      
       const checkRegex = (string) => {
         const regex = /state\p{L}+/gu;
         return regex.test(string);
       }
 
-      if(!isNaN(Number(action))) {
+      if (userInfo?.isBan) {
+        await bot.sendMessage(chatId, `Ваш акаунт заблоковано`);
+        return
+      } else if(!isNaN(Number(action))) {
         let selectedLot = query.data;
         const choosenLotStatus = await readGoogle(ranges.statusCell(selectedLot));
         if (choosenLotStatus[0] === 'new') {
@@ -63,6 +68,9 @@ export const anketaListiner = async() => {
           bot.deleteMessage(chatId, userInfo.recentMessage).catch((error) => {logger.warn(`Помилка видалення повідомлення: ${error}`);});
           const message3 = bot.sendMessage(chatId, phrases.greetings, { reply_markup: keyboards.listInline });
           await updateRecentMessageByChatId(chatId, message3.message_id);
+          break;
+        case '/filter': 
+          await filterKeyboard(chatId, 'Область', ranges.stateColumn);
           break;
         case '/list':
           bot.deleteMessage(chatId, userInfo.recentMessage).catch((error) => {logger.warn(`Помилка видалення повідомлення: ${error}`);});
@@ -116,7 +124,10 @@ export const anketaListiner = async() => {
     bot.on('message', async (msg) => {
       const chatId = msg.chat.id;
       const userInfo = await findUserByChatId(chatId);
-      if (msg.contact) {
+      if (userInfo?.isBan) {
+        await bot.sendMessage(chatId, `Ваш акаунт заблоковано`);
+        return
+      } else if (msg.contact) {
         bot.deleteMessage(chatId, userInfo.recentMessage).catch((error) => {logger.warn(`Помилка видалення повідомлення: ${error}`);});
         const userData = await updateUserByChatId(chatId, { 
           firstname: msg.contact.first_name,

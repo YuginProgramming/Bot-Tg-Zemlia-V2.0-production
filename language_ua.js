@@ -36,7 +36,7 @@ const keyboards = {
       [{ text: 'Почати спочатку', callback_data: '/start' }]
     ]},
     listInline: { inline_keyboard: [
-      [{ text: 'Зробити замовлення', callback_data: `/list` }]
+      [{ text: 'Зробити замовлення', callback_data: `/filter` }]
     ]},
     inlineConfirmation: {
       inline_keyboard: [

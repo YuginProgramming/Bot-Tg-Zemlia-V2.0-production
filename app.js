@@ -1,7 +1,7 @@
 import TelegramBot from 'node-telegram-bot-api';
 import { anketaListiner } from './anketa.js';
 import { dataBot } from './values.js';
-import { postingLots, autoPosting } from './postingLot.js';
+import { postingLots, autoPosting, userMenegment } from './postingLot.js';
 import { sequelize } from './models/sequelize.js';
 import { logger } from './logger/index.js';
 
@@ -43,6 +43,7 @@ main();
 
 anketaListiner();
 postingLots();
+userMenegment();
 setInterval(() => {
     autoPosting();
   }, dataBot.autopostingTimer);
