@@ -52,7 +52,7 @@ export const anketaListiner = async() => {
           }
           checkStatus(selectedLot, chatId);
           await updateUserByChatId(chatId, { lotNumber: selectedLot });
-          if (userInfo.isAuthenticated) {
+          if (userInfo?.isAuthenticated) {
             const message = await bot.sendMessage(chatId, `Раді вас знову бачити ${userInfo.firstname}`, { reply_markup: keyboards.finishOrder });
             await updateRecentMessageByChatId(chatId, message.message_id);  
           } else {

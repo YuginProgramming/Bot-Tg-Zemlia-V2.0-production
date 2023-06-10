@@ -1,3 +1,4 @@
 node_modules
 credentials.json
 values.js
+./models/sequelize.js
